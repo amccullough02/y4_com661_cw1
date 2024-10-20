@@ -1,5 +1,6 @@
 from pymongo import MongoClient
 from random import randint, uniform, choice
+from bson.objectid import ObjectId
 
 client = MongoClient("mongodb://127.0.0.1:27017")
 db = client.EDB_DB
@@ -30,6 +31,7 @@ def generate_star():
 
 def generate_planet():
     return {
+        "_id": ObjectId(),
         "name": "HIP" + str(randint(1, 50000)) + choice(planet_identifiers),
         "radius": randint(2000, 80000),
         "mass": round(uniform(0.1, 500), 2),

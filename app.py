@@ -9,7 +9,7 @@ db = client.EDB_DB
 bodies = db.bodies
 
 
-@app.route("/api/1.0/bodies", methods=["GET"])
+@app.route("/api/v1.0/bodies", methods=["GET"])
 def query_all_stars():
     page_num, page_size = 1, 10
     if request.args.get('pn'):
@@ -22,14 +22,16 @@ def query_all_stars():
     data_to_return = []
     bodies_cursor = bodies.find().skip(page_start).limit(page_size)
 
-    for body in bodies_cursor:
-        body['_id'] = str(body['_id'])
-        data_to_return.append(body)
+    for star in bodies_cursor:
+        star['_id'] = str(star['_id'])
+        for planet in star.get('planets', []):
+            planet['_id'] = str(planet['_id'])
+        data_to_return.append(star)
 
     return make_response(jsonify(data_to_return), 200)
 
 
-@app.route("/api/1.0/bodies/<string:s_id>", methods=["GET"])
+@app.route("/api/v1.0/bodies/<string:s_id>", methods=["GET"])
 def query_one_star(s_id):
     body = bodies.find_one({'_id': ObjectId(s_id)})
     if body is not None:
@@ -37,7 +39,7 @@ def query_one_star(s_id):
     return make_response(jsonify(body), 200)
 
 
-@app.route("/api/1.0/bodies", methods=["POST"])
+@app.route("/api/v1.0/bodies", methods=["POST"])
 def add_star():
     new_star = {
         "name": request.form["name"],
@@ -57,7 +59,7 @@ def add_star():
     return make_response(jsonify({"url": new_star_link}), 201)
 
 
-@app.route("/api/1.0/bodies/<string:s_id>", methods=["PUT"])
+@app.route("/api/v1.0/bodies/<string:s_id>", methods=["PUT"])
 def modify_star(s_id):
     bodies.update_one(
         {"_id": ObjectId(s_id)}, {"$set": {
@@ -72,10 +74,11 @@ def modify_star(s_id):
             "absolute_magnitude": request.form["absolute_magnitude"]
         }})
     edited_star_link = "http://127.0.0.1:5000/api/v1.0/bodies/" + s_id
+    # TODO: {} not returned
     return make_response(jsonify({"url": edited_star_link}), 200)
 
 
-@app.route("/api/1.0/bodies/<string:s_id>", methods=["DELETE"])
+@app.route("/api/v1.0/bodies/<string:s_id>", methods=["DELETE"])
 def remove_star(s_id):
     bodies.delete_one({"_id": ObjectId(s_id)})
     return make_response(jsonify({}), 204)
