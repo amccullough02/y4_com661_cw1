@@ -9,6 +9,9 @@ db = client.EDB_DB
 bodies = db.bodies
 
 
+# STARS
+
+
 @app.route("/api/v1.0/bodies", methods=["GET"])
 def query_all_stars():
     page_num, page_size = 1, 10
@@ -36,6 +39,8 @@ def query_one_star(s_id):
     body = bodies.find_one({'_id': ObjectId(s_id)})
     if body is not None:
         body['_id'] = str(body['_id'])
+        for planet in body.get('planets', []):
+            planet['_id'] = str(planet['_id'])
     return make_response(jsonify(body), 200)
 
 
@@ -82,6 +87,38 @@ def modify_star(s_id):
 def remove_star(s_id):
     bodies.delete_one({"_id": ObjectId(s_id)})
     return make_response(jsonify({}), 204)
+
+
+# PLANETS
+
+@app.route("/api/v1.0/bodies<string:s_id>/planets", methods=["GET"])
+def query_all_planets(s_id):
+    data_to_return = []
+    body = bodies.find_one(
+        {"_id": ObjectId(s_id)},
+        {"planets": 1, "_id": 0})
+    for planet in body["planets"]:
+        planet["_id"] = str(planet["_id"])
+        data_to_return.append(planet)
+    return make_response(jsonify(data_to_return), 200)
+
+
+def query_one_planet():
+    pass
+
+
+def add_planet():
+    pass
+
+
+def modify_planet():
+    pass
+
+
+def remove_planet():
+    pass
+
+# AUTH
 
 
 if __name__ == "__main__":
