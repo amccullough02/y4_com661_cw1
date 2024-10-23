@@ -1,8 +1,11 @@
 from flask import Flask, request, jsonify, make_response
 from pymongo import MongoClient
 from bson import ObjectId
+from datetime import datetime, UTC, timedelta
+from jwt import encode
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = "thewitchofcolchis"
 
 client = MongoClient("mongodb://127.0.0.1/27017")
 db = client.EDB_DB
@@ -168,6 +171,21 @@ def remove_planet(s_id, p_id):
     return make_response(jsonify({}), 204)
 
 # AUTH
+
+
+@app.route("/api/v1.0/login", methods=["GET"])
+def login():
+    auth = request.authorization
+    if auth and auth.password == "password":
+        token = encode({
+            "user": auth.username,
+            "exp": datetime.now(UTC) + timedelta(minutes=30)},
+            app.config['SECRET_KEY'],
+            algorithm="HS256")
+        return make_response(jsonify({"token": token}), 200)
+    return make_response("Could not verify", 401,
+                         {'WWW-Authenticate':
+                          'Basic realm = "Login Required"'})
 
 
 if __name__ == "__main__":
