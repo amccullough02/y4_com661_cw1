@@ -1,16 +1,56 @@
 from flask import Flask, request, jsonify, make_response
 from pymongo import MongoClient
 from bson import ObjectId
+from functools import wraps
 from datetime import datetime, UTC, timedelta
-from jwt import encode
+from jwt import encode, decode
+from bcrypt import checkpw
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "thewitchofcolchis"
 
 client = MongoClient("mongodb://127.0.0.1/27017")
+
 db = client.EDB_DB
 bodies = db.bodies
+users = db.users
+blacklist = db.blacklist
 
+# DECORATORS
+
+
+def jwt_required(func):
+    @wraps(func)
+    def jwt_required_wrapper(*args, **kwargs):
+        token = None
+        if 'x-access-token' in request.headers:
+            token = request.headers['x-access-token']
+        if not token:
+            return make_response(jsonify(
+                {"message": "Token is missing"}), 401)
+        bl_token = blacklist.find_one({"token": token})
+        if bl_token is not None:
+            return make_response(jsonify(
+                {"message": "Token has expired"}), 401)
+        try:
+            data = decode(token, app.config['SECRET_KEY'], algorithms="HS256")
+        except:
+            make_response(jsonify({"message": "Token is invalid"}), 401)
+        return func(*args, **kwargs)
+    return jwt_required_wrapper
+
+
+def admin_required(func):
+    @wraps(func)
+    def admin_required_wrapper(*args, **kwargs):
+        token = request.headers['x-access-token']
+        data = decode(token, app.config['SECRET_KEY'], algorithms="HS256")
+        if data["is_admin"]:
+            return func(args, **kwargs)
+        else:
+            return make_response(jsonify(
+                {'message': 'Admin access required'}), 401)
+    return admin_required_wrapper
 
 # STARS
 
@@ -48,6 +88,8 @@ def query_one_star(s_id):
 
 
 @app.route("/api/v1.0/bodies", methods=["POST"])
+@jwt_required
+@admin_required
 def add_star():
     new_star = {
         "name": request.form["name"],
@@ -68,6 +110,8 @@ def add_star():
 
 
 @app.route("/api/v1.0/bodies/<string:s_id>", methods=["PUT"])
+@jwt_required
+@admin_required
 def modify_star(s_id):
     bodies.update_one(
         {"_id": ObjectId(s_id)}, {"$set": {
@@ -86,12 +130,14 @@ def modify_star(s_id):
 
 
 @app.route("/api/v1.0/bodies/<string:s_id>", methods=["DELETE"])
+@jwt_required
+@admin_required
 def remove_star(s_id):
     bodies.delete_one({"_id": ObjectId(s_id)})
     return make_response(jsonify({}), 204)  # TODO: {} not returned
 
-
 # PLANETS
+
 
 @app.route("/api/v1.0/bodies/<string:s_id>/planets", methods=["GET"])
 def query_all_planets(s_id):
@@ -116,6 +162,7 @@ def query_one_planet(s_id, p_id):
 
 
 @app.route("/api/v1.0/bodies/<string:s_id>/planets", methods=["POST"])
+@jwt_required
 def add_planet(s_id):
     planet_to_add = {
         "_id": ObjectId(),
@@ -141,6 +188,7 @@ def add_planet(s_id):
 
 @app.route("/api/v1.0/bodies/<string:s_id>/planets/<string:p_id>",
            methods=["PUT"])
+@jwt_required
 def modify_planet(s_id, p_id):
     modified_planet = {
         "planets.$.name": request.form["name"],
@@ -165,6 +213,8 @@ def modify_planet(s_id, p_id):
 
 @app.route("/api/v1.0/bodies/<string:s_id>/planets/<string:p_id>",
            methods=["DELETE"])
+@jwt_required
+@admin_required
 def remove_planet(s_id, p_id):
     bodies.update_one({"_id": ObjectId(s_id)}, {
                       "$pull": {"planets": {"_id": ObjectId(p_id)}}})
@@ -176,16 +226,36 @@ def remove_planet(s_id, p_id):
 @app.route("/api/v1.0/login", methods=["GET"])
 def login():
     auth = request.authorization
-    if auth and auth.password == "password":
-        token = encode({
-            "user": auth.username,
-            "exp": datetime.now(UTC) + timedelta(minutes=30)},
-            app.config['SECRET_KEY'],
-            algorithm="HS256")
-        return make_response(jsonify({"token": token}), 200)
-    return make_response("Could not verify", 401,
-                         {'WWW-Authenticate':
-                          'Basic realm = "Login Required"'})
+    if auth:
+        user = users.find_one({"username": auth.username})
+        if user is not None:
+            if checkpw(bytes(auth.password, "UTF-8"), user["password"]):
+                token = encode({
+                    "user": auth.username,
+                    "is_admin": user["is_admin"],
+                    "exp": datetime.now(UTC) + timedelta(minutes=30)},
+                    app.config["SECRET_KEY"],
+                    algorithm="HS256")
+                return make_response(jsonify({"token": token}), 200)
+            else:
+                return make_response(jsonify({
+                    "message": "Incorrect password"
+                }), 401)
+        else:
+            return make_response(jsonify({
+                "message": "Incorrect username"
+            }),  401)
+    return make_response(jsonify({
+        "message": "Authentication required"
+    }), 401)
+
+
+@app.route("/api/v1.0/logout", methods=["GET"])
+@jwt_required
+def logout():
+    token = request.headers['x-access-token']
+    blacklist.insert_one({"token": token})
+    return make_response(jsonify({"message": "Logout successful"}))
 
 
 if __name__ == "__main__":
