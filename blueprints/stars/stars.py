@@ -38,7 +38,7 @@ def query_one_star(s_id):
             planet['_id'] = str(planet['_id'])
         return make_response(jsonify(body), 200)
     else:
-        return make_response(jsonify({"error": "Invalidated star ID"}), 404)
+        return make_response(jsonify({"error": "invalid star ID"}), 404)
 
 
 @stars_bp.route("/api/v1.0/bodies", methods=["POST"])
@@ -53,7 +53,7 @@ def add_star():
                       if not request.form.get(field)]
     if missing_fields:
         return make_response(jsonify(
-            {"error": f"Missing fields: {", ".join(missing_fields)}"}), 404)
+            {"error": f"missing fields: {", ".join(missing_fields)}"}), 404)
     new_star = {
         "name": request.form["name"],
         "radius": request.form["radius"],
@@ -84,7 +84,7 @@ def modify_star(s_id):
                       if not request.form.get(field)]
     if missing_fields:
         return make_response(jsonify(
-            {"error": f"Missing fields: {", ".join(missing_fields)}"}), 400)
+            {"error": f"missing fields: {", ".join(missing_fields)}"}), 400)
     result = bodies.update_one(
         {"_id": ObjectId(s_id)}, {"$set": {
             "name": request.form["name"],
@@ -117,4 +117,4 @@ def remove_star(s_id):
             return make_response(
                 jsonify({"error": "deletion attempt failed"}), 500)
     else:
-        return make_response(jsonify({"error": "Invalid star ID"}), 404)
+        return make_response(jsonify({"error": "invalid star ID"}), 404)

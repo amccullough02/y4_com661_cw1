@@ -26,14 +26,14 @@ def login():
                 return make_response(jsonify({"token": token}), 200)
             else:
                 return make_response(jsonify({
-                    "message": "Incorrect password"
+                    "message": "incorrect password"
                 }), 401)
         else:
             return make_response(jsonify({
-                "message": "Incorrect username"
+                "message": "incorrect username"
             }),  401)
     return make_response(jsonify({
-        "message": "Authentication required"
+        "message": "authentication required"
     }), 401)
 
 
@@ -42,4 +42,4 @@ def login():
 def logout():
     token = request.headers['x-access-token']
     blacklist.insert_one({"token": token})
-    return make_response(jsonify({"message": "Logout successful"}))
+    return make_response(jsonify({"message": "logout successful"}))

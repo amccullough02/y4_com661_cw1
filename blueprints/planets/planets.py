@@ -26,12 +26,25 @@ def query_one_planet(s_id, p_id):
         {"planets._id": ObjectId(p_id)},
         {"_id": 0, "planets.$": 1})
     body["planets"][0]["_id"] = str(body["planets"][0]["_id"])
-    return make_response(jsonify(body["planets"][0]), 200)
+    if body is not None:
+        return make_response(jsonify(body["planets"][0]), 200)
+    else:
+        return make_response(jsonify({"error": "invalid planet ID"}))
 
 
 @planets_bp.route("/api/v1.0/bodies/<string:s_id>/planets", methods=["POST"])
 @jwt_required
 def add_planet(s_id):
+    required_fields = ["name", "radius", "mass", "density",
+                       "surface_temperature", "apoapsis",
+                       "periapsis", "eccentricity",
+                       "orbital_period", "status", "num_moons",
+                       "contributed_by"]
+    missing_fields = [field for field in required_fields
+                      if not request.form.get(field)]
+    if missing_fields:
+        return make_response(jsonify(
+            {"error": f"missing fields: {",".join(missing_fields)}"}), 404)
     planet_to_add = {
         "_id": ObjectId(),
         "name": request.form["name"],
@@ -58,6 +71,16 @@ def add_planet(s_id):
                   methods=["PUT"])
 @jwt_required
 def modify_planet(s_id, p_id):
+    required_fields = ["name", "radius", "mass", "density",
+                       "surface_temperature", "apoapsis",
+                       "periapsis", "eccentricity",
+                       "orbital_period", "status", "num_moons",
+                       "contributed_by"]
+    missing_fields = [field for field in required_fields
+                      if not request.form.get(field)]
+    if missing_fields:
+        return make_response(jsonify(
+            {"error": f"missing fields: {",".join(missing_fields)}"}), 404)
     modified_planet = {
         "planets.$.name": request.form["name"],
         "planets.$.radius": request.form["radius"],
@@ -72,11 +95,14 @@ def modify_planet(s_id, p_id):
         "planets.$.num_moons": request.form["num_moons"],
         "planets.$.contributed_by": request.form["contributed_by"]
     }
-    bodies.update_one({"planets._id": ObjectId(p_id)},
-                      {"$set": modified_planet})
-    modified_planet_url = "http://127.0.0.1:5000/api/v1.0/bodies/" + \
-        s_id + "/planets/" + p_id
-    return make_response(jsonify({"url": modified_planet_url}), 200)
+    result = bodies.update_one({"planets._id": ObjectId(p_id)},
+                               {"$set": modified_planet})
+    if result.matched_count == 1:
+        modified_planet_url = "http://127.0.0.1:5000/api/v1.0/bodies/" + \
+            s_id + "/planets/" + p_id
+        return make_response(jsonify({"url": modified_planet_url}), 200)
+    else:
+        return make_response(jsonify({"error": "invalid planet ID"}), 404)
 
 
 @planets_bp.route("/api/v1.0/bodies/<string:s_id>/planets/<string:p_id>",
@@ -84,6 +110,17 @@ def modify_planet(s_id, p_id):
 @jwt_required
 @admin_required
 def remove_planet(s_id, p_id):
-    bodies.update_one({"_id": ObjectId(s_id)}, {
-                      "$pull": {"planets": {"_id": ObjectId(p_id)}}})
-    return make_response(jsonify({}), 204)
+    if ObjectId.is_valid(s_id):
+        if ObjectId.is_valid(p_id):
+            result = bodies.update_one({"_id": ObjectId(s_id)}, {
+                            "$pull": {"planets": {"_id": ObjectId(p_id)}}})
+            if result.matched_count == 1:
+                return make_response(
+                    jsonify({"message": "planet deleted successfully"}), 204)
+            else:
+                return make_response(
+                    jsonify({"message": "deletion attempt failed"}), 500)
+        else:
+            return make_response(jsonify({"error": "invalid planet ID"}))
+    else:
+        return make_response(jsonify({"error": "invalid star ID"}))
