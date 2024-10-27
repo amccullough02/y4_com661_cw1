@@ -6,17 +6,18 @@ client = MongoClient("mongodb://127.0.0.1:27017")
 db = client.EDB_DB
 bodies = db.bodies
 
-usernames = ["starlord34", "stargal21", "galaxycrusher59", "blazingquasar02"]
+usernames = ["starlord34", "stargal21", "galaxycrusher59"]
 spectra = ["O", "B", "A", "F", "G", "K", "M"]
-statuses = ["Confirmed", "Candidate", "Disproven"]
+statuses = ["confirmed", "candidate", "disproven"]
 planet_identifiers = ["b", "c", "d", "e", "f", "g", "h", "i"]
 
 bodies_list = []
 
 
 def generate_star():
+    star_name = "HIP " + str(randint(1, 50000))
     return {
-        "name": "HIP" + str(randint(1, 50000)),
+        "name": star_name,
         "radius": randint(200000, 5000000),
         "mass": round(uniform(0.05, 3), 2),
         "density": round(uniform(1, 3), 2),
@@ -25,14 +26,15 @@ def generate_star():
         "spectral_classification": choice(spectra),
         "apparent_magnitude": round(uniform(-1, 8), 2),
         "absolute_magnitude": round(uniform(-1, 8), 2),
-        "planets": [generate_planet() for _ in range(randint(0, 9))]
+        "planets": [generate_planet(star_name, identifier)
+                    for identifier in planet_identifiers[:randint(0, 9)]]
     }
 
 
-def generate_planet():
+def generate_planet(star_name, identifier):
     return {
         "_id": ObjectId(),
-        "name": "HIP" + str(randint(1, 50000)) + choice(planet_identifiers),
+        "name": star_name + " " + identifier,
         "radius": randint(2000, 80000),
         "mass": round(uniform(0.1, 500), 2),
         "density": round(uniform(0.5, 7), 2),
