@@ -1,20 +1,22 @@
-from flask import Blueprint, make_response, request, jsonify
+from flask import Blueprint, make_response, request, jsonify, g
 from bson import ObjectId
 from decorators import jwt_required, admin_required
+from datetime import datetime
 from globals import db
 
 stars_bp = Blueprint("stars_bp", __name__)
 bodies = db.bodies
+logs = db.logs
 
 
 @stars_bp.route("/api/v1.0/bodies", methods=["GET"])
 def query_all_stars():
     page_num, page_size = 1, 10
 
-    if request.args.get('pn'):
-        page_num = int(request.args.get('pn'))
-    if request.args.get('ps'):
-        page_size = int(request.args.get('ps'))
+    if request.args.get("pn"):
+        page_num = int(request.args.get("pn"))
+    if request.args.get("ps"):
+        page_size = int(request.args.get("ps"))
 
     page_start = (page_size * (page_num - 1))
 
@@ -23,7 +25,7 @@ def query_all_stars():
 
     for star in bodies_cursor:
         star["_id"] = str(star["_id"])
-        for planet in star.get('planets', []):
+        for planet in star.get("planets", []):
             planet["_id"] = str(planet["_id"])
         data_to_return.append(star)
 
@@ -41,7 +43,7 @@ def query_one_star(s_id):
     body = bodies.find_one({"_id": ObjectId(s_id)})
     body["_id"] = str(body["_id"])
 
-    for planet in body.get('planets', []):
+    for planet in body.get("planets", []):
         planet["_id"] = str(planet["_id"])
     return make_response(jsonify(body), 200)
 
@@ -78,6 +80,11 @@ def add_star():
     new_star_id = bodies.insert_one(new_star)
     s_id = new_star_id.inserted_id
     r_link = f"http://127.0.0.1:5000/api/v1.0/bodies/{s_id}"
+
+    current_user = g.current_username
+    time = datetime.now().strftime("%H:%M:%S, %m/%d/%Y")
+    log = f"The user {current_user} created the star {s_id} at {time}"
+    logs.insert_one({"log": log})
 
     return make_response(jsonify({"url": r_link}), 201)
 

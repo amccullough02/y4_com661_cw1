@@ -81,6 +81,6 @@ def login():
 @auth_bp.route("/api/v1.0/logout", methods=["GET"])
 @jwt_required
 def logout():
-    token = request.headers['x-access-token']
+    token = request.headers["x-access-token"]
     blacklist.insert_one({"token": token})
     return make_response(jsonify({"message": "logout successful"}))
