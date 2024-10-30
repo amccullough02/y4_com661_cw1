@@ -10,6 +10,7 @@ bodies = db.bodies
 @stars_bp.route("/api/v1.0/bodies", methods=["GET"])
 def query_all_stars():
     page_num, page_size = 1, 10
+
     if request.args.get('pn'):
         page_num = int(request.args.get('pn'))
     if request.args.get('ps'):
@@ -31,14 +32,18 @@ def query_all_stars():
 
 @stars_bp.route("/api/v1.0/bodies/<string:s_id>", methods=["GET"])
 def query_one_star(s_id):
+    if not ObjectId.is_valid(s_id):
+        return make_response(jsonify({"error": "invalid star ID"}), 400)
+
+    if bodies.find_one({'_id': ObjectId(s_id)}) is None:
+        return make_response(jsonify({"error": "star ID does not exist"}), 404)
+
     body = bodies.find_one({'_id': ObjectId(s_id)})
-    if body is not None:
-        body['_id'] = str(body['_id'])
-        for planet in body.get('planets', []):
-            planet['_id'] = str(planet['_id'])
-        return make_response(jsonify(body), 200)
-    else:
-        return make_response(jsonify({"error": "invalid star ID"}), 404)
+    body['_id'] = str(body['_id'])
+
+    for planet in body.get('planets', []):
+        planet['_id'] = str(planet['_id'])
+    return make_response(jsonify(body), 200)
 
 
 @stars_bp.route("/api/v1.0/bodies", methods=["POST"])
@@ -49,11 +54,14 @@ def add_star():
                        "surface_temperature", "distance",
                        "spectral_classification", "apparent_magnitude",
                        "absolute_magnitude"]
+
     missing_fields = [field for field in required_fields
                       if not request.form.get(field)]
+
     if missing_fields:
         return make_response(jsonify(
             {"error": f"missing fields: {", ".join(missing_fields)}"}), 404)
+
     new_star = {
         "name": request.form["name"],
         "radius": request.form["radius"],
@@ -66,25 +74,36 @@ def add_star():
         "absolute_magnitude": request.form["absolute_magnitude"],
         "planets": []
     }
+
     new_star_id = bodies.insert_one(new_star)
-    new_star_link = "http://127.0.0.1:5000/api/v1.0/bodies/" + \
-        str(new_star_id.inserted_id)
-    return make_response(jsonify({"url": new_star_link}), 201)
+    s_id = new_star_id.inserted_id
+    r_link = f"http://127.0.0.1:5000/api/v1.0/bodies/{s_id}"
+
+    return make_response(jsonify({"url": r_link}), 201)
 
 
 @stars_bp.route("/api/v1.0/bodies/<string:s_id>", methods=["PUT"])
 @jwt_required
 @admin_required
 def modify_star(s_id):
+    if not ObjectId.is_valid(s_id):
+        return make_response(jsonify({"error": "invalid star ID"}), 400)
+
+    if bodies.find_one({'_id': ObjectId(s_id)}) is None:
+        return make_response(jsonify({"error": "star ID does not exist"}), 404)
+
     required_fields = ["name", "radius", "mass", "density",
                        "surface_temperature", "distance",
                        "spectral_classification", "apparent_magnitude",
                        "absolute_magnitude"]
+
     missing_fields = [field for field in required_fields
                       if not request.form.get(field)]
+
     if missing_fields:
         return make_response(jsonify(
             {"error": f"missing fields: {", ".join(missing_fields)}"}), 400)
+
     result = bodies.update_one(
         {"_id": ObjectId(s_id)}, {"$set": {
             "name": request.form["name"],
@@ -97,24 +116,29 @@ def modify_star(s_id):
             "apparent_magnitude": request.form["apparent_magnitude"],
             "absolute_magnitude": request.form["absolute_magnitude"]
         }})
-    if result.matched_count == 1:
-        edited_star_link = "http://127.0.0.1:5000/api/v1.0/bodies/" + s_id
+
+    if result.modified_count == 1:
+        edited_star_link = f"http://127.0.0.1:5000/api/v1.0/bodies/{s_id}"
         return make_response(jsonify({"url": edited_star_link}), 200)
     else:
-        return make_response(jsonify({"error": "invalid star ID"}), 404)
+        return make_response(jsonify({"error": "failed to modify star"}), 500)
 
 
 @stars_bp.route("/api/v1.0/bodies/<string:s_id>", methods=["DELETE"])
 @jwt_required
 @admin_required
 def remove_star(s_id):
-    if ObjectId.is_valid(s_id):
-        result = bodies.delete_one({"_id": ObjectId(s_id)})
-        if result.deleted_count == 1:
-            return make_response(
-                jsonify({"message": "star deleted successfully"}), 204)
-        else:
-            return make_response(
-                jsonify({"error": "deletion attempt failed"}), 500)
+    if not ObjectId.is_valid(s_id):
+        return make_response(jsonify({"error": "invalid star ID"}), 400)
+
+    if bodies.find_one({'_id': ObjectId(s_id)}) is None:
+        return make_response(jsonify({"error": "star ID does not exist"}), 404)
+
+    result = bodies.delete_one({"id": ObjectId(s_id)})
+
+    if result.deleted_count == 1:
+        return make_response(
+            jsonify({"message": "star deleted successfully"}), 204)
     else:
-        return make_response(jsonify({"error": "invalid star ID"}), 404)
+        return make_response(
+            jsonify({"error": "deletion attempt failed"}), 500)
