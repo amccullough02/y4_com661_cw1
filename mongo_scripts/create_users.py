@@ -8,16 +8,16 @@ users = db.users
 user_list = [
     {
         "username": "starlord34",
-        "first_name": "Chris",
-        "second_name": "Pratt",
+        "forename": "Chris",
+        "surname": "Pratt",
         "email": "realchrispratt@gmail.com",
         "password": b"iammario",
         "is_admin": False
     },
     {
         "username": "stargal21",
-        "first_name": "Zoe",
-        "second_name": "Saldana",
+        "forename": "Zoe",
+        "surname": "Saldana",
         "email": "realzoe@gmail.com",
         "password": b"iamgamora",
         "is_admin": True
@@ -25,8 +25,8 @@ user_list = [
     },
     {
         "username": "galaxycrusher59",
-        "first_name": "Robert",
-        "second_name": "Downey Jr.",
+        "forename": "Robert",
+        "surname": "Downey Jr.",
         "email": "youknowwhoiam@gmail.com",
         "password": b"iamironman",
         "is_admin": False
