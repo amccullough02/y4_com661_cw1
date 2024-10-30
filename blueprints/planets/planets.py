@@ -12,7 +12,7 @@ def query_all_planets(s_id):
     if not ObjectId.is_valid(s_id):
         return make_response(jsonify({"error": "invalid star ID"}), 400)
 
-    if bodies.find_one({'_id': ObjectId(s_id)}) is None:
+    if bodies.find_one({"_id": ObjectId(s_id)}) is None:
         return make_response(jsonify({"error": "star ID does not exist"}), 404)
 
     data_to_return = []
@@ -34,11 +34,11 @@ def query_one_planet(s_id, p_id):
     if not ObjectId.is_valid(p_id):
         return make_response(jsonify({"error": "invalid planet ID"}), 400)
 
-    if bodies.find_one({'_id': ObjectId(s_id)}) is None:
+    if bodies.find_one({"_id": ObjectId(s_id)}) is None:
         return make_response(jsonify({"error": "star ID does not exist"}), 404)
 
-    if bodies.find_one({{"_id": ObjectId(s_id),
-                         "planets._id": ObjectId(p_id)}}) is None:
+    if bodies.find_one({"_id": ObjectId(s_id),
+                        "planets._id": ObjectId(p_id)}) is None:
         return make_response(
             jsonify({"error": "planet ID does not exist"}), 404)
 
@@ -56,7 +56,7 @@ def add_planet(s_id):
     if not ObjectId.is_valid(s_id):
         return make_response(jsonify({"error": "invalid star ID"}), 400)
 
-    if bodies.find_one({'_id': ObjectId(s_id)}) is None:
+    if bodies.find_one({"_id": ObjectId(s_id)}) is None:
         return make_response(jsonify({"error": "star ID does not exist"}), 404)
 
     required_fields = ["name", "radius", "mass", "density",
@@ -108,11 +108,11 @@ def modify_planet(s_id, p_id):
     if not ObjectId.is_valid(p_id):
         return make_response(jsonify({"error": "invalid planet ID"}), 400)
 
-    if bodies.find_one({'_id': ObjectId(s_id)}) is None:
+    if bodies.find_one({"_id": ObjectId(s_id)}) is None:
         return make_response(jsonify({"error": "star ID does not exist"}), 404)
 
-    if bodies.find_one({{"_id": ObjectId(s_id),
-                         "planets._id": ObjectId(p_id)}}) is None:
+    if bodies.find_one({"_id": ObjectId(s_id),
+                        "planets._id": ObjectId(p_id)}) is None:
         return make_response(
             jsonify({"error": "planet ID does not exist"}), 404)
 
@@ -150,7 +150,7 @@ def modify_planet(s_id, p_id):
 
     if result.modified_count == 1:
         r_link = f"http://127.0.0.1:5000/api/v1.0/bodies/{s_id}/planets/{p_id}"
-        return make_response(jsonify({"url": r_link}), 200)
+        return make_response(jsonify({"url": r_link}), 202)
     else:
         return make_response(
             jsonify({"error": "failed to modify planet"}), 500)
@@ -167,11 +167,11 @@ def remove_planet(s_id, p_id):
     if not ObjectId.is_valid(p_id):
         return make_response(jsonify({"error": "invalid planet ID"}), 400)
 
-    if bodies.find_one({'_id': ObjectId(s_id)}) is None:
+    if bodies.find_one({"_id": ObjectId(s_id)}) is None:
         return make_response(jsonify({"error": "star ID does not exist"}), 404)
 
-    if bodies.find_one({{"_id": ObjectId(s_id),
-                         "planets._id": ObjectId(p_id)}}) is None:
+    if bodies.find_one({"_id": ObjectId(s_id),
+                        "planets._id": ObjectId(p_id)}) is None:
         return make_response(
             jsonify({"error": "planet ID does not exist"}), 404)
 

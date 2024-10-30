@@ -22,9 +22,9 @@ def query_all_stars():
     bodies_cursor = bodies.find().skip(page_start).limit(page_size)
 
     for star in bodies_cursor:
-        star['_id'] = str(star['_id'])
+        star["_id"] = str(star["_id"])
         for planet in star.get('planets', []):
-            planet['_id'] = str(planet['_id'])
+            planet["_id"] = str(planet["_id"])
         data_to_return.append(star)
 
     return make_response(jsonify(data_to_return), 200)
@@ -35,14 +35,14 @@ def query_one_star(s_id):
     if not ObjectId.is_valid(s_id):
         return make_response(jsonify({"error": "invalid star ID"}), 400)
 
-    if bodies.find_one({'_id': ObjectId(s_id)}) is None:
+    if bodies.find_one({"_id": ObjectId(s_id)}) is None:
         return make_response(jsonify({"error": "star ID does not exist"}), 404)
 
-    body = bodies.find_one({'_id': ObjectId(s_id)})
-    body['_id'] = str(body['_id'])
+    body = bodies.find_one({"_id": ObjectId(s_id)})
+    body["_id"] = str(body["_id"])
 
     for planet in body.get('planets', []):
-        planet['_id'] = str(planet['_id'])
+        planet["_id"] = str(planet["_id"])
     return make_response(jsonify(body), 200)
 
 
@@ -89,7 +89,7 @@ def modify_star(s_id):
     if not ObjectId.is_valid(s_id):
         return make_response(jsonify({"error": "invalid star ID"}), 400)
 
-    if bodies.find_one({'_id': ObjectId(s_id)}) is None:
+    if bodies.find_one({"_id": ObjectId(s_id)}) is None:
         return make_response(jsonify({"error": "star ID does not exist"}), 404)
 
     required_fields = ["name", "radius", "mass", "density",
@@ -119,7 +119,7 @@ def modify_star(s_id):
 
     if result.modified_count == 1:
         edited_star_link = f"http://127.0.0.1:5000/api/v1.0/bodies/{s_id}"
-        return make_response(jsonify({"url": edited_star_link}), 200)
+        return make_response(jsonify({"url": edited_star_link}), 202)
     else:
         return make_response(jsonify({"error": "failed to modify star"}), 500)
 
@@ -131,10 +131,10 @@ def remove_star(s_id):
     if not ObjectId.is_valid(s_id):
         return make_response(jsonify({"error": "invalid star ID"}), 400)
 
-    if bodies.find_one({'_id': ObjectId(s_id)}) is None:
+    if bodies.find_one({"_id": ObjectId(s_id)}) is None:
         return make_response(jsonify({"error": "star ID does not exist"}), 404)
 
-    result = bodies.delete_one({"id": ObjectId(s_id)})
+    result = bodies.delete_one({"_id": ObjectId(s_id)})
 
     if result.deleted_count == 1:
         return make_response(
