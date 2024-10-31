@@ -13,6 +13,7 @@ logs = db.logs
 def query_all_stars():
     page_num, page_size = 1, 10
     order = "closest"
+    show_planets = False
 
     if request.args.get("pn"):
         page_num = int(request.args.get("pn"))
@@ -20,6 +21,8 @@ def query_all_stars():
         page_size = int(request.args.get("ps"))
     if request.args.get("order"):
         order = request.args.get("order")
+    if request.args.get("show_planets"):
+        show_planets = request.args.get("show_planets").title()
 
     page_start = (page_size * (page_num - 1))
 
@@ -34,8 +37,11 @@ def query_all_stars():
 
     for star in bodies_cursor:
         star["_id"] = str(star["_id"])
-        for planet in star.get("planets", []):
-            planet["_id"] = str(planet["_id"])
+        if show_planets:
+            for planet in star.get("planets", []):
+                planet["_id"] = str(planet["_id"])
+        else:
+            star.pop("planets", None)
         data_to_return.append(star)
 
     return make_response(jsonify(data_to_return), 200)

@@ -21,7 +21,6 @@ def jwt_required(func):
                 {"message": "Token has expired, refresh session"}), 401)
         try:
             data = decode(token, secret_key, algorithms="HS256")
-            # Using flask global context to store the current username.
             g.current_username = data.get("user")
         except:
             make_response(jsonify({"message": "Token is invalid"}), 401)

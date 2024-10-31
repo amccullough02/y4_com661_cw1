@@ -13,7 +13,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(logs_bp)
 
 
-def shutdown(signal, frame):  # Facilitates graceful shutdowns.
+def shutdown(signal, frame):
     print("Shutting down...")
     exit(0)
 
