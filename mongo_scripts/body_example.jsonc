@@ -1,28 +1,29 @@
 {
-    "name": "HIP 39210",
-    "radius": 800000, // km
-    "mass": 1.4, // Solar masses
-    "density": 1.21, // g/cm^3
-    "surface_temperature": 5700, // kelvin
-    "distance": 87.3, // ly
-    "spectral_classification": "G2",
-    "apparent_magnitude": 2.43, 
-    "absolute_magnitude": -1.45,
-    "planets": [
-        {
-            "name": "HIP 39210 b",
-            "radius": 4000, // km
-            "mass": 0.83, // Earth masses
-            "density": 5.31, // g/cm^3
-            "surface_temperature": 365, // kelvin
-            "apoapsis": 17000000, // km
-            "periapsis": 18000000, // km
-            "eccentricity": 0.058,
-            "orbital_period": 12, // days
-            "status": "Candidate", // Confirmed, Candidate, Disproven
-            "num_moons": 0,
-            "contributed_by": "galaxygirl23"
-            
-        }
-    ]
+  "name": "HIP 39210",
+  "type": "star",
+  "radius": 800000, // km
+  "mass": 1.4, // Solar masses
+  "density": 1.21, // g/cm^3
+  "surface_temperature": 5700, // kelvin
+  "distance": 87.3, // ly
+  "spectral_classification": "G2",
+  "apparent_magnitude": 2.43,
+  "absolute_magnitude": -1.45,
+  "planets": [
+    {
+      "name": "HIP 39210 b",
+      "type": "planet",
+      "radius": 4000, // km
+      "mass": 0.83, // Earth masses
+      "density": 5.31, // g/cm^3
+      "surface_temperature": 365, // kelvin
+      "apoapsis": 17000000, // km
+      "periapsis": 18000000, // km
+      "eccentricity": 0.058,
+      "orbital_period": 12, // days
+      "status": "Candidate", // Confirmed, Candidate, Disproven
+      "num_moons": 0,
+      "contributed_by": "galaxygirl23"
+    }
+  ]
 }

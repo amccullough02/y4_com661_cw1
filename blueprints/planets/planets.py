@@ -27,6 +27,20 @@ def query_all_planets(s_id):
     return make_response(jsonify(data_to_return), 200)
 
 
+@planets_bp.route("/api/v1.0/bodies/num_of_planets", methods=["GET"])
+def number_of_planets():
+    agr_pipeline = [
+        {"$match": {"type": "star"}},
+        {"$unwind": "$planets"},
+        {"$match": {"planets.type": "planet"}},
+        {"$count": "Number of planets"}
+    ]
+
+    agr_return = list(bodies.aggregate(agr_pipeline))
+
+    return make_response(jsonify(agr_return), 200)
+
+
 @planets_bp.route("/api/v1.0/bodies/<string:s_id>/planets/<string:p_id>",
                   methods=["GET"])
 def query_one_planet(s_id, p_id):
@@ -76,6 +90,7 @@ def add_planet(s_id):
     planet_to_add = {
         "_id": ObjectId(),
         "name": request.form["name"],
+        "type": "planet",
         "radius": request.form["radius"],
         "mass": request.form["mass"],
         "density": request.form["density"],
@@ -139,6 +154,7 @@ def modify_planet(s_id, p_id):
 
     modified_planet = {
         "planets.$.name": request.form["name"],
+        "planets.$.type": "planet",
         "planets.$.radius": request.form["radius"],
         "planets.$.mass": request.form["mass"],
         "planets.$.density": request.form["density"],

@@ -32,6 +32,17 @@ def query_all_stars():
     return make_response(jsonify(data_to_return), 200)
 
 
+@stars_bp.route("/api/v1.0/bodies/num_of_stars", methods=["GET"])
+def number_of_stars():
+    agr_pipeline = [
+        {"$match": {"type": "star"}}, {"$count": "Number of stars"}
+    ]
+
+    agr_return = list(bodies.aggregate(agr_pipeline))
+
+    return make_response(jsonify(agr_return), 200)
+
+
 @stars_bp.route("/api/v1.0/bodies/<string:s_id>", methods=["GET"])
 def query_one_star(s_id):
     if not ObjectId.is_valid(s_id):
@@ -66,6 +77,7 @@ def add_star():
 
     new_star = {
         "name": request.form["name"],
+        "type": "star",
         "radius": request.form["radius"],
         "mass": request.form["mass"],
         "density": request.form["density"],
@@ -114,6 +126,7 @@ def modify_star(s_id):
     result = bodies.update_one(
         {"_id": ObjectId(s_id)}, {"$set": {
             "name": request.form["name"],
+            "type": "star",
             "radius": request.form["radius"],
             "mass": request.form["mass"],
             "density": request.form["density"],

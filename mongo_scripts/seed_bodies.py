@@ -18,6 +18,7 @@ def generate_star():
     star_name = "HIP " + str(randint(1, 50000))
     return {
         "name": star_name,
+        "type": "star",
         "radius": randint(200000, 5000000),
         "mass": round(uniform(0.05, 3), 2),
         "density": round(uniform(1, 3), 2),
@@ -35,6 +36,7 @@ def generate_planet(star_name, identifier):
     return {
         "_id": ObjectId(),
         "name": star_name + " " + identifier,
+        "type": "planet",
         "radius": randint(2000, 80000),
         "mass": round(uniform(0.1, 500), 2),
         "density": round(uniform(0.5, 7), 2),
