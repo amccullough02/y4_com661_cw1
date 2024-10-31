@@ -139,6 +139,14 @@ def modify_planet(s_id, p_id):
         return make_response(
             jsonify({"error": "planet ID does not exist"}), 404)
 
+    body = bodies.find_one({"planets._id": ObjectId(p_id)}, {
+                           "_id": 0, "planets.$": 1})
+    contributor = body["planets"][0]["contributed_by"]
+
+    if contributor != g.current_username or not g.is_admin:
+        return make_response(
+            jsonify({"error": "planet must be your contribution"}), 401)
+
     required_fields = ["name", "radius", "mass", "density",
                        "surface_temperature", "apoapsis", "periapsis",
                        "eccentricity", "orbital_period", "status",

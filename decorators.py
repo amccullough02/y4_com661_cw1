@@ -22,6 +22,7 @@ def jwt_required(func):
         try:
             data = decode(token, secret_key, algorithms="HS256")
             g.current_username = data.get("user")
+            g.is_admin = data.get("is_admin")
         except:
             make_response(jsonify({"message": "Token is invalid"}), 401)
         return func(*args, **kwargs)
