@@ -1,10 +1,12 @@
-from flask import Blueprint, make_response, request, jsonify
+from flask import Blueprint, make_response, request, jsonify, g
 from bson import ObjectId
 from decorators import jwt_required, admin_required
+from datetime import datetime
 from globals import db
 
 planets_bp = Blueprint("planets_bp", __name__)
 bodies = db.bodies
+logs = db.logs
 
 
 @planets_bp.route("/api/v1.0/bodies/<string:s_id>/planets", methods=["GET"])
@@ -92,6 +94,12 @@ def add_planet(s_id):
     if result.modified_count == 1:
         p_id = str(planet_to_add["_id"])
         r_link = f"http://127.0.0.1:5000/api/v1.0/bodies/{s_id}/planets/{p_id}"
+
+        current_user = g.current_username
+        time = datetime.now().strftime("%H:%M:%S, %m/%d/%Y")
+        log = f"The user {current_user} added the planet {p_id} at {time}"
+        logs.insert_one({"user": current_user, "time": time, "action": log})
+
         return make_response(jsonify({"url": r_link}), 201)
     else:
         return make_response(
@@ -150,6 +158,12 @@ def modify_planet(s_id, p_id):
 
     if result.modified_count == 1:
         r_link = f"http://127.0.0.1:5000/api/v1.0/bodies/{s_id}/planets/{p_id}"
+
+        current_user = g.current_username
+        time = datetime.now().strftime("%H:%M:%S, %m/%d/%Y")
+        log = f"The user {current_user} edited the planet {p_id} at {time}"
+        logs.insert_one({"user": current_user, "time": time, "action": log})
+
         return make_response(jsonify({"url": r_link}), 202)
     else:
         return make_response(
@@ -179,6 +193,12 @@ def remove_planet(s_id, p_id):
         "$pull": {"planets": {"_id": ObjectId(p_id)}}})
 
     if result.matched_count == 1:
+
+        current_user = g.current_username
+        time = datetime.now().strftime("%H:%M:%S, %m/%d/%Y")
+        log = f"The user {current_user} removed the planet {p_id} at {time}"
+        logs.insert_one({"user": current_user, "time": time, "action": log})
+
         return make_response(
             jsonify({"message": "planet deleted successfully"}), 204)
     else:

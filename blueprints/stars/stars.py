@@ -84,7 +84,7 @@ def add_star():
     current_user = g.current_username
     time = datetime.now().strftime("%H:%M:%S, %m/%d/%Y")
     log = f"The user {current_user} created the star {s_id} at {time}"
-    logs.insert_one({"log": log})
+    logs.insert_one({"user": current_user, "time": time, "action": log})
 
     return make_response(jsonify({"url": r_link}), 201)
 
@@ -126,6 +126,12 @@ def modify_star(s_id):
 
     if result.modified_count == 1:
         edited_star_link = f"http://127.0.0.1:5000/api/v1.0/bodies/{s_id}"
+
+        current_user = g.current_username
+        time = datetime.now().strftime("%H:%M:%S, %m/%d/%Y")
+        log = f"The user {current_user} edited the star {s_id} at {time}"
+        logs.insert_one({"user": current_user, "time": time, "action": log})
+
         return make_response(jsonify({"url": edited_star_link}), 202)
     else:
         return make_response(jsonify({"error": "failed to modify star"}), 500)
@@ -144,6 +150,12 @@ def remove_star(s_id):
     result = bodies.delete_one({"_id": ObjectId(s_id)})
 
     if result.deleted_count == 1:
+
+        current_user = g.current_username
+        time = datetime.now().strftime("%H:%M:%S, %m/%d/%Y")
+        log = f"The user {current_user} deleted the star {s_id} at {time}"
+        logs.insert_one({"user": current_user, "time": time, "action": log})
+
         return make_response(
             jsonify({"message": "star deleted successfully"}), 204)
     else:
