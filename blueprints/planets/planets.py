@@ -78,7 +78,7 @@ def add_planet(s_id):
     required_fields = ["name", "radius", "mass", "density",
                        "surface_temperature", "apoapsis", "periapsis",
                        "eccentricity", "orbital_period", "status",
-                       "num_moons", "contributed_by"]
+                       "num_moons"]
 
     missing_fields = [field for field in required_fields
                       if not request.form.get(field)]
@@ -101,7 +101,7 @@ def add_planet(s_id):
         "orbital_period": request.form["orbital_period"],
         "status": request.form["status"],
         "num_moons": request.form["num_moons"],
-        "contributed_by": request.form["contributed_by"]
+        "contributed_by": g.current_username
     }
 
     result = bodies.update_one({"_id": ObjectId(s_id)},
