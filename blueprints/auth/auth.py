@@ -49,7 +49,7 @@ def register():
     users.insert_one(user_to_add)
 
     return make_response(
-        jsonify({"message": "account registration successful"}))
+        jsonify({"message": "account registration successful"}), 200)
 
 
 @auth_bp.route("/api/v1.0/login", methods=["GET"])
@@ -83,4 +83,4 @@ def login():
 def logout():
     token = request.headers["x-access-token"]
     blacklist.insert_one({"token": token})
-    return make_response(jsonify({"message": "logout successful"}))
+    return make_response(jsonify({"message": "logout successful"}), 200)

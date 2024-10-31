@@ -41,9 +41,9 @@ def query_all_stars():
     for star in bodies_cursor:
         star["_id"] = str(star["_id"])
         if convert_units:
-            star["distance"] *= 9.46e12  # convert light-years to km
-            star["surface_temperature"] -= 273  # convert kelvin to celsius
-            star["mass"] *= 1.99e30  # convert solar massses to mass in kg
+            star["distance"] *= 9.46e12
+            star["surface_temperature"] -= 273
+            star["mass"] *= 1.99e30
         if show_planets:
             for planet in star.get("planets", []):
                 planet["_id"] = str(planet["_id"])
