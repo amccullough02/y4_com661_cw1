@@ -12,16 +12,25 @@ logs = db.logs
 @stars_bp.route("/api/v1.0/bodies", methods=["GET"])
 def query_all_stars():
     page_num, page_size = 1, 10
+    order = "closest"
 
     if request.args.get("pn"):
         page_num = int(request.args.get("pn"))
     if request.args.get("ps"):
         page_size = int(request.args.get("ps"))
+    if request.args.get("order"):
+        order = request.args.get("order")
 
     page_start = (page_size * (page_num - 1))
 
+    sort_order = 1
+
+    if order == "farthest":
+        sort_order = -1
+
     data_to_return = []
-    bodies_cursor = bodies.find().skip(page_start).limit(page_size)
+    bodies_cursor = bodies.find().sort(
+        "distance", sort_order).skip(page_start).limit(page_size)
 
     for star in bodies_cursor:
         star["_id"] = str(star["_id"])
