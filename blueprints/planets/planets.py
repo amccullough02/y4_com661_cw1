@@ -67,7 +67,7 @@ def query_one_planet(s_id, p_id):
                         "planets._id": ObjectId(p_id)}) is None:
         return make_response(
             jsonify({"error": "planet ID does not exist"}), 404)
-    
+
     convert_units = False
 
     if request.args.get("convert_units"):
