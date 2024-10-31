@@ -1,7 +1,5 @@
-from flask import Blueprint, make_response, request, jsonify, g
-from bson import ObjectId
+from flask import Blueprint, make_response, request, jsonify
 from decorators import jwt_required, admin_required
-from datetime import datetime
 from globals import db
 
 logs_bp = Blueprint("logs_bp", __name__)
@@ -45,4 +43,3 @@ def user_activity():
     data_to_return = {item["_id"]: item["count"] for item in agr_return}
 
     return make_response(jsonify(data_to_return), 200)
-    
