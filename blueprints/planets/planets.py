@@ -91,16 +91,16 @@ def add_planet(s_id):
         "_id": ObjectId(),
         "name": request.form["name"],
         "type": "planet",
-        "radius": request.form["radius"],
-        "mass": request.form["mass"],
-        "density": request.form["density"],
-        "surface_temperature": request.form["surface_temperature"],
-        "apoapsis": request.form["apoapsis"],
-        "periapsis": request.form["periapsis"],
-        "eccentricity": request.form["eccentricity"],
-        "orbital_period": request.form["orbital_period"],
+        "radius": int(request.form["radius"]),
+        "mass": float(request.form["mass"]),
+        "density": float(request.form["density"]),
+        "surface_temperature": int(request.form["surface_temperature"]),
+        "apoapsis": int(request.form["apoapsis"]),
+        "periapsis": int(request.form["periapsis"]),
+        "eccentricity": float(request.form["eccentricity"]),
+        "orbital_period": int(request.form["orbital_period"]),
         "status": request.form["status"],
-        "num_moons": request.form["num_moons"],
+        "num_moons": int(request.form["num_moons"]),
         "contributed_by": g.current_username
     }
 
@@ -163,18 +163,18 @@ def modify_planet(s_id, p_id):
     modified_planet = {
         "planets.$.name": request.form["name"],
         "planets.$.type": "planet",
-        "planets.$.radius": request.form["radius"],
-        "planets.$.mass": request.form["mass"],
-        "planets.$.density": request.form["density"],
+        "planets.$.radius": int(request.form["radius"]),
+        "planets.$.mass": float(request.form["mass"]),
+        "planets.$.density": float(request.form["density"]),
         "planets.$.surface_temperature":
-        request.form["surface_temperature"],
-        "planets.$.apoapsis": request.form["apoapsis"],
-        "planets.$.periapsis": request.form["periapsis"],
-        "planets.$.eccentricity": request.form["eccentricity"],
-        "planets.$.orbital_period": request.form["orbital_period"],
+        int(request.form["surface_temperature"]),
+        "planets.$.apoapsis": int(request.form["apoapsis"]),
+        "planets.$.periapsis": int(request.form["periapsis"]),
+        "planets.$.eccentricity": float(request.form["eccentricity"]),
+        "planets.$.orbital_period": int(request.form["orbital_period"]),
         "planets.$.status": request.form["status"],
-        "planets.$.num_moons": request.form["num_moons"],
-        "planets.$.contributed_by": request.form["contributed_by"]
+        "planets.$.num_moons": int(request.form["num_moons"]),
+        "planets.$.contributed_by": g.current_username
     }
 
     result = bodies.update_one({"planets._id": ObjectId(p_id)},

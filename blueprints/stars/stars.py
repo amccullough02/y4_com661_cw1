@@ -14,6 +14,7 @@ def query_all_stars():
     page_num, page_size = 1, 10
     order = "closest"
     show_planets = False
+    convert_units = False
 
     if request.args.get("pn"):
         page_num = int(request.args.get("pn"))
@@ -23,6 +24,8 @@ def query_all_stars():
         order = request.args.get("order")
     if request.args.get("show_planets"):
         show_planets = request.args.get("show_planets").title()
+    if request.args.get("convert_units"):
+        convert_units = request.args.get("convert_units").title()
 
     page_start = (page_size * (page_num - 1))
 
@@ -37,6 +40,10 @@ def query_all_stars():
 
     for star in bodies_cursor:
         star["_id"] = str(star["_id"])
+        if convert_units:
+            star["distance"] *= 9.46e12  # convert light-years to km
+            star["surface_temperature"] -= 273  # convert kelvin to celsius
+            star["mass"] *= 1.99e30  # convert solar massses to mass in kg
         if show_planets:
             for planet in star.get("planets", []):
                 planet["_id"] = str(planet["_id"])
@@ -66,11 +73,28 @@ def query_one_star(s_id):
     if bodies.find_one({"_id": ObjectId(s_id)}) is None:
         return make_response(jsonify({"error": "star ID does not exist"}), 404)
 
+    show_planets = False
+    convert_units = False
+
+    if request.args.get("show_planets"):
+        show_planets = request.args.get("show_planets").title()
+    if request.args.get("convert_units"):
+        convert_units = request.args.get("convert_units").title()
+
     body = bodies.find_one({"_id": ObjectId(s_id)})
     body["_id"] = str(body["_id"])
 
-    for planet in body.get("planets", []):
-        planet["_id"] = str(planet["_id"])
+    if convert_units:
+        body["distance"] *= 9.46e12
+        body["surface_temperature"] -= 273
+        body["mass"] *= 1.99e30
+
+    if show_planets:
+        for planet in body.get("planets", []):
+            planet["_id"] = str(planet["_id"])
+    else:
+        body.pop("planets", None)
+
     return make_response(jsonify(body), 200)
 
 
@@ -93,14 +117,14 @@ def add_star():
     new_star = {
         "name": request.form["name"],
         "type": "star",
-        "radius": request.form["radius"],
-        "mass": request.form["mass"],
-        "density": request.form["density"],
-        "surface_temperature": request.form["surface_temperature"],
-        "distance": request.form["distance"],
+        "radius": int(request.form["radius"]),
+        "mass": float(request.form["mass"]),
+        "density": float(request.form["density"]),
+        "surface_temperature": int(request.form["surface_temperature"]),
+        "distance": int(request.form["distance"]),
         "spectral_classification": request.form["spectral_classification"],
-        "apparent_magnitude": request.form["apparent_magnitude"],
-        "absolute_magnitude": request.form["absolute_magnitude"],
+        "apparent_magnitude": float(request.form["apparent_magnitude"]),
+        "absolute_magnitude": float(request.form["absolute_magnitude"]),
         "planets": []
     }
 
@@ -142,14 +166,14 @@ def modify_star(s_id):
         {"_id": ObjectId(s_id)}, {"$set": {
             "name": request.form["name"],
             "type": "star",
-            "radius": request.form["radius"],
-            "mass": request.form["mass"],
-            "density": request.form["density"],
-            "surface_temperature": request.form["surface_temperature"],
-            "distance": request.form["distance"],
+            "radius": int(request.form["radius"]),
+            "mass": float(request.form["mass"]),
+            "density": float(request.form["density"]),
+            "surface_temperature": int(request.form["surface_temperature"]),
+            "distance": int(request.form["distance"]),
             "spectral_classification": request.form["spectral_classification"],
-            "apparent_magnitude": request.form["apparent_magnitude"],
-            "absolute_magnitude": request.form["absolute_magnitude"]
+            "apparent_magnitude": float(request.form["apparent_magnitude"]),
+            "absolute_magnitude": float(request.form["absolute_magnitude"]),
         }})
 
     if result.modified_count == 1:
