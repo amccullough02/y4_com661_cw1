@@ -17,11 +17,21 @@ def query_all_planets(s_id):
     if bodies.find_one({"_id": ObjectId(s_id)}) is None:
         return make_response(jsonify({"error": "star ID does not exist"}), 404)
 
+    convert_units = False
+
+    if request.args.get("convert_units"):
+        convert_units = request.args.get("convert_units").title()
+
     data_to_return = []
     body = bodies.find_one({"_id": ObjectId(s_id)}, {"planets": 1, "_id": 0})
 
     for planet in body["planets"]:
         planet["_id"] = str(planet["_id"])
+
+        if convert_units:
+            planet["mass"] *= 5.97e24
+            planet["surface_temperature"] -= 273
+
         data_to_return.append(planet)
 
     return make_response(jsonify(data_to_return), 200)
@@ -57,11 +67,20 @@ def query_one_planet(s_id, p_id):
                         "planets._id": ObjectId(p_id)}) is None:
         return make_response(
             jsonify({"error": "planet ID does not exist"}), 404)
+    
+    convert_units = False
+
+    if request.args.get("convert_units"):
+        convert_units = request.args.get("convert_units").title()
 
     body = bodies.find_one({"planets._id": ObjectId(p_id)}, {
                            "_id": 0, "planets.$": 1})
 
     body["planets"][0]["_id"] = str(body["planets"][0]["_id"])
+
+    if convert_units:
+        body["planets"][0]["mass"] *= 5.97e24
+        body["planets"][0]["surface_temperature"] -= 273
 
     return make_response(jsonify(body["planets"][0]), 200)
 
