@@ -1,10 +1,12 @@
 from pymongo import MongoClient
 from random import randint, uniform, choice
+from datetime import datetime
 from bson.objectid import ObjectId
 
 client = MongoClient("mongodb://127.0.0.1:27017")
 db = client.EDB_DB
 bodies = db.bodies
+logs = db.logs
 
 usernames = ["starlord34", "stargal21", "galaxycrusher59"]
 spectra = ["O", "B", "A", "F", "G", "K", "M"]
@@ -40,8 +42,15 @@ def generate_planet(star_name, identifier):
     eccentricity = (apoapsis - periapsis) / (apoapsis + periapsis)
     eccentricity = round(eccentricity, 2)
 
+    username = choice(usernames)
+
+    p_id = ObjectId()
+    time = datetime.now().strftime("%H:%M:%S, %m/%d/%Y")
+    log = f"The user {username} created the planet {p_id} at {time}"
+    logs.insert_one({"user": username, "time": time, "action": log})
+
     return {
-        "_id": ObjectId(),
+        "_id": p_id,
         "name": star_name + " " + identifier,
         "type": "planet",
         "radius": randint(2000, 80000),
@@ -54,7 +63,7 @@ def generate_planet(star_name, identifier):
         "orbital_period": randint(1, 2000),
         "status": choice(statuses),
         "num_moons": randint(0, 20),
-        "contributed_by": choice(usernames)
+        "contributed_by": username
     }
 
 

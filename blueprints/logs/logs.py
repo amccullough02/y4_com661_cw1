@@ -50,7 +50,17 @@ def user_activity():
 @jwt_required
 @admin_required
 def query_logs_by_user(username):
-    user_logs = list(logs.find({"user": username}))
+    page_num, page_size = 1, 10
+
+    if request.args.get("pn"):
+        page_num = int(request.args.get("pn"))
+    if request.args.get("ps"):
+        page_size = int(request.args.get("ps"))
+
+    page_start = (page_size * (page_num - 1))
+
+    user_logs = list(logs.find({"user": username}).skip(
+        page_start).limit(page_size))
 
     if not user_logs:
         return make_response(
