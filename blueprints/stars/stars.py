@@ -12,7 +12,7 @@ logs = db.logs
 @stars_bp.route("/api/v1.0/bodies", methods=["GET"])
 def query_all_stars():
     page_num, page_size = 1, 10
-    order = "closest"
+    order = "ascending"
     show_planets = False
     convert_units = False
 
@@ -31,7 +31,7 @@ def query_all_stars():
 
     sort_order = 1
 
-    if order == "farthest":
+    if order == "descending":
         sort_order = -1
 
     data_to_return = []
@@ -209,7 +209,7 @@ def remove_star(s_id):
         logs.insert_one({"user": current_user, "time": time, "action": log})
 
         return make_response(
-            jsonify({"message": "star deleted successfully"}), 204)
+            jsonify({"message": "star deleted successfully"}), 200)
     else:
         return make_response(
             jsonify({"error": "deletion attempt failed"}), 500)

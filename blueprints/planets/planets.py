@@ -104,7 +104,7 @@ def add_planet(s_id):
 
     if missing_fields:
         return make_response(jsonify(
-            {"error": f"missing fields: {",".join(missing_fields)}"}), 404)
+            {"error": f"missing fields: {", ".join(missing_fields)}"}), 404)
 
     planet_to_add = {
         "_id": ObjectId(),
@@ -176,7 +176,7 @@ def modify_planet(s_id, p_id):
 
     if missing_fields:
         return make_response(
-            jsonify({"error": f"missing fields: {",".join(missing_fields)}"}),
+            jsonify({"error": f"missing fields: {", ".join(missing_fields)}"}),
             404)
 
     modified_planet = {
@@ -243,7 +243,7 @@ def remove_planet(s_id, p_id):
         logs.insert_one({"user": current_user, "time": time, "action": log})
 
         return make_response(
-            jsonify({"message": "planet deleted successfully"}), 204)
+            jsonify({"message": "planet deleted successfully"}), 200)
     else:
         return make_response(
             jsonify({"message": "deletion attempt failed"}), 500)

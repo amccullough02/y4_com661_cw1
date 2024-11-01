@@ -76,7 +76,7 @@ def remove_log(l_id):
 
     if result.deleted_count == 1:
         return make_response(
-            jsonify({"message": "log deleted successfully"}), 204)
+            jsonify({"message": "log deleted successfully"}), 200)
     else:
         return make_response(
             jsonify({"error": "deletion attempt failed"}), 500)
@@ -94,4 +94,4 @@ def remove_logs():
 
     result = logs.delete_many({})
     return make_response(
-        jsonify({"message": f"{result.deleted_count} logs deleted"}), 204)
+        jsonify({"message": f"{result.deleted_count} logs deleted"}), 200)
