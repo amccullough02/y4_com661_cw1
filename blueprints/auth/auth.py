@@ -12,7 +12,7 @@ blacklist = db.blacklist
 
 @auth_bp.route("/api/v1.0/register", methods=["POST"])
 def register():
-    required_fields = ["username", "email", "password"]
+    required_fields = ["username", "surname", "forename", "email", "password"]
 
     missing_fields = [field for field in required_fields
                       if not request.form.get(field)]
@@ -52,11 +52,11 @@ def register():
         jsonify({"message": "account registration successful"}), 200)
 
 
+@auth_bp.route("/api/v1.0/register_admin", methods=["POST"])
 @jwt_required
 @admin_required
-@auth_bp.route("/api/v1.0/register_admin", methods=["POST"])
 def register_admin():
-    required_fields = ["username", "email", "password"]
+    required_fields = ["username", "surname", "forename", "email", "password"]
 
     missing_fields = [field for field in required_fields
                       if not request.form.get(field)]
