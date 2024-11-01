@@ -169,7 +169,7 @@ def modify_planet(s_id, p_id):
     required_fields = ["name", "radius", "mass", "density",
                        "surface_temperature", "apoapsis", "periapsis",
                        "eccentricity", "orbital_period", "status",
-                       "num_moons", "contributed_by"]
+                       "num_moons"]
 
     missing_fields = [
         field for field in required_fields if not request.form.get(field)]
