@@ -33,6 +33,13 @@ def generate_star():
 
 
 def generate_planet(star_name, identifier):
+    apoapsis, periapsis = sorted((
+        randint(4000000, 1000000000),
+        randint(4000000, 1000000000)), reverse=True)
+
+    eccentricity = (apoapsis - periapsis) / (apoapsis + periapsis)
+    eccentricity = round(eccentricity, 2)
+
     return {
         "_id": ObjectId(),
         "name": star_name + " " + identifier,
@@ -41,9 +48,9 @@ def generate_planet(star_name, identifier):
         "mass": round(uniform(0.1, 500), 2),
         "density": round(uniform(0.5, 7), 2),
         "surface_temperature": randint(100, 1000),
-        "apoapsis": randint(4000000, 1000000000),
-        "periapsis": randint(4000000, 1000000000),
-        "eccentricity": round(uniform(0, 0.7), 2),
+        "apoapsis": apoapsis,
+        "periapsis": periapsis,
+        "eccentricity": eccentricity,
         "orbital_period": randint(1, 2000),
         "status": choice(statuses),
         "num_moons": randint(0, 20),
@@ -62,6 +69,6 @@ def seed_data():
 
 
 if __name__ == "__main__":
-    generate_data(10)
+    generate_data(150)
     seed_data()
     client.close()
