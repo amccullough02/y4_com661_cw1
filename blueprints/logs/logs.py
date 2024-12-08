@@ -30,6 +30,21 @@ def query_all_logs():
     return make_response(jsonify(data_to_return), 200)
 
 
+@logs_bp.route("/api/v1.0/all_logs", methods=["GET"])
+@jwt_required
+@admin_required
+def logs_no_pagination():
+
+    data_to_return = []
+    logs_cursor = logs.find()
+
+    for log in logs_cursor:
+        log["_id"] = str(log["_id"])
+        data_to_return.append(log)
+
+    return make_response(jsonify(data_to_return), 200)
+
+
 @logs_bp.route("/api/v1.0/logs/user_activity", methods=["GET"])
 @jwt_required
 @admin_required
