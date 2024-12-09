@@ -116,7 +116,7 @@ def login():
 
     token = encode({
         "user": auth.username, "is_admin": user["is_admin"],
-        "exp": datetime.now(UTC) + timedelta(minutes=30)},
+        "exp": datetime.now(UTC) + timedelta(minutes=60)},
         secret_key, algorithm="HS256")
 
     return make_response(jsonify({"token": token}), 200)
