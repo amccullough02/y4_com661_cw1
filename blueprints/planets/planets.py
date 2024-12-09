@@ -162,7 +162,7 @@ def modify_planet(s_id, p_id):
                            "_id": 0, "planets.$": 1})
     contributor = body["planets"][0]["contributed_by"]
 
-    if contributor != g.current_username or not g.is_admin:
+    if not g.is_admin and contributor != g.current_username:
         return make_response(
             jsonify({"error": "planet must be your contribution"}), 401)
 
