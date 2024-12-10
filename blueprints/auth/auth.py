@@ -1,6 +1,5 @@
 from flask import Blueprint, request, make_response, jsonify
 from datetime import datetime, UTC, timedelta
-from bson import ObjectId
 from jwt import encode
 from bcrypt import checkpw, gensalt, hashpw
 from decorators import jwt_required, admin_required
@@ -159,17 +158,12 @@ def get_account_by_username(username):
     return make_response(jsonify(user), 200)
 
 
-@auth_bp.route("/api/v1.0/accounts/<string:a_id>", methods=["DELETE"])
+@auth_bp.route("/api/v1.0/accounts/<string:username>", methods=["DELETE"])
 @jwt_required
 @admin_required
-def delete_account(a_id):
-    if not ObjectId.is_valid(a_id):
-        return make_response(jsonify({"error": "invalid user ID"}), 400)
+def delete_account(username):
 
-    if users.find_one({"_id": ObjectId(a_id)}) is None:
-        return make_response(jsonify({"error": "user ID does not exist"}), 404)
-
-    result = users.delete_one({"_id": ObjectId(a_id)})
+    result = users.delete_one({"username": username})
 
     if result.deleted_count == 1:
         return make_response(
