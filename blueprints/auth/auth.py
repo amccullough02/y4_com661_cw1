@@ -147,7 +147,6 @@ def get_all_accounts():
 
 @auth_bp.route("/api/v1.0/accounts/<string:username>", methods=["GET"])
 @jwt_required
-@admin_required
 def get_account_by_username(username):
     user = users.find_one({"username": username})
     if user is None:
